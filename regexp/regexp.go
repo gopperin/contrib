@@ -2,17 +2,19 @@ package regexp
 
 import (
 	"regexp"
+
+	"github.com/dlclark/regexp2"
 )
 
-// IsGoodPwd 是否是合格的密码
-func IsGoodPwd(pwd string) (bool, string) {
-	if pwd == "" {
-		return false, "密码不能为空"
+func IsGoodPwd(str string) (bool, string) {
+	expr := `^(?![0-9a-zA-Z]+$)(?![a-zA-Z!@#$%^&*]+$)(?![0-9!@#$%^&*]+$)[0-9A-Za-z!@#$%^&*]{8,16}$`
+	reg, _ := regexp2.Compile(expr, 0)
+	m, _ := reg.FindStringMatch(str)
+	if m != nil {
+		res := m.String()
+		return true, res
 	}
-	if len(pwd) < 6 {
-		return false, "密码至少6位"
-	}
-	return true, ""
+	return false, "密码包含至少一位数字，字母和特殊字符,且长度8-16"
 }
 
 // IsEmail 是否是email
@@ -45,6 +47,6 @@ func IsMobile(mobileNum string) bool {
 
 // MobileReplaceRepl MobileReplaceRepl 手机号脱敏
 func MobileReplaceRepl(str string) string {
-	re, _ := regexp.Compile("(\\d{3})(\\d{4})(\\d{4})")
+	re, _ := regexp.Compile(`(\d{3})(\d{4})(\d{4})`)
 	return re.ReplaceAllString(str, "$1****$3")
 }
